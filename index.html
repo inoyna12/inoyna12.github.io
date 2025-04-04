@@ -5,64 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>手机号获取工具</title>
     <style>
-        /* 新增提示样式 */
-        .copy-toast {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 15px 0;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        button {
+            padding: 12px 30px;
             font-size: 16px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 1000;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        button:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .copy-toast.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* 优化按钮样式 */
-        .copy-btn {
-            width: 90px;
-            padding: 8px 15px;
-            font-size: 14px;
-            background-color: #4CAF50;
-            transition: transform 0.2s;
-        }
-
-        .copy-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* 其他保持原有样式 */
-        .number-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
+        #result {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            font-size: 18px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background-color: white;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin: 10px 0;
             opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
         }
-        .show {
+
+        #result.show {
             opacity: 1;
             transform: translateY(0);
         }
-        #result {
-            margin-top: 15px;
-            padding: 16px;
-            font-size: 18px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: white;
-            min-height: 54px;
+
+        .number-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .copy-btn {
+            padding: 6px 15px;
+            font-size: 14px;
+            background-color: #4CAF50;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+            height: 20px;
         }
     </style>
 </head>
@@ -70,7 +86,6 @@
     <button onclick="fetchData()">立即获取手机号</button>
     <div class="loading-text"></div>
     <div id="result"></div>
-    <div class="copy-toast">已复制号码</div> <!-- 新增提示元素 -->
 
     <script>
         const API_URL = 'http://api.sqhyw.net:90/api/get_mobile?token=JHgU7pAlOFmgwj2yhrbu22YEQj5ukiCD8mp/z/DU+oiTHcCVjRmy28BOBmryL4avhMpLP3TPLRVnHHC0N6Hc5NhjwUYcVN2nEhWHJyAEIXhD+Ji2TsDEXdZUcqnceCb4N5e3txfaViKcySckknr9ZYCb7Y7LGc5Es2NhzUXheHA=&project_id=774202&special=1';
@@ -80,65 +95,39 @@
             const loadingText = document.querySelector('.loading-text');
             const resultElement = document.getElementById('result');
             
-            btn.classList.add('loading');
-            loadingText.textContent = '获取号码中···';
-            resultElement.innerHTML = '';
+            btn.disabled = true;
+            loadingText.textContent = '正在获取号码...';
+            resultElement.classList.remove('show');
 
             fetch(API_URL)
             .then(async response => {
                 if (!response.ok) throw new Error(`请求失败 (${response.status})`);
-                const text = await response.text();
-                try {
-                    return JSON.parse(text);
-                } catch {
-                    return text;
-                }
-            })
-            .then(data => {
+                const data = await response.json();
                 if (data.message === 'ok' && data.mobile) {
                     resultElement.innerHTML = `
                         <div class="number-box">
                             <span>${data.mobile}</span>
-                            <button class="copy-btn" onclick="copyToClipboard('${data.mobile}')">复制号码</button>
+                            <button class="copy-btn" onclick="copyToClipboard('${data.mobile}')">复制</button>
                         </div>
                     `;
-                    setTimeout(() => {
-                        resultElement.querySelector('.number-box').classList.add('show');
-                    }, 50);
+                    setTimeout(() => resultElement.classList.add('show'), 50);
                     loadingText.textContent = '';
                 } else {
                     throw new Error(data.message || '无效的响应数据');
                 }
             })
             .catch(error => {
-                loadingText.textContent = `❌ 错误：${error.message}`;
+                loadingText.textContent = `获取失败: ${error.message}`;
+                resultElement.classList.remove('show');
             })
             .finally(() => {
-                btn.classList.remove('loading');
+                btn.disabled = false;
             });
         }
 
         function copyToClipboard(number) {
-            const toast = document.querySelector('.copy-toast');
-            
             navigator.clipboard.writeText(number)
-                .then(() => {
-                    // 显示提示
-                    toast.classList.add('show');
-                    // 1秒后渐隐
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                    }, 1000);
-                })
-                .catch(err => {
-                    console.error('复制失败:', err);
-                    toast.textContent = '复制失败';
-                    toast.classList.add('show');
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                        toast.textContent = '已复制号码';
-                    }, 1000);
-                });
+                .catch(err => console.error('复制失败:', err));
         }
     </script>
 </body>
