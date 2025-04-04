@@ -1,5 +1,33 @@
-<form id="smsForm">
-  <input type="tel" name="phone" placeholder="手机号" required>
-  <textarea name="message" placeholder="短信内容" required></textarea>
-  <button type="submit">发送</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>复刻页面</title>
+  <!-- 引入第三方库（如 Bootstrap） -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar bg-dark text-light p-3">
+    <div class="container">
+      <span class="navbar-brand">复刻页面</span>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <div class="container mt-4">
+    <div class="card">
+      <div class="card-header">功能模块标题</div>
+      <div class="card-body">
+        <!-- 内容：表单、表格、按钮等 -->
+        <button id="actionBtn" class="btn btn-primary">点击交互</button>
+        <div id="contentArea" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入脚本 -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
