@@ -5,23 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>手机号获取工具</title>
     <style>
-        /* 新增验证码样式 */
-        .code-box {
-            margin-top: 15px;
-            padding: 12px;
-            background: #e8f4ff;
-            border-radius: 8px;
-            display: none;
-        }
-        .code-box.show {
+        .info-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
         }
-        #verification-status {
-            margin-top: 10px;
-            color: #666;
-            font-size: 0.9em;
+        .number-box {
+            background: #e8f4ff;
+        }
+        .code-box {
+            background: #fff3e0;
+        }
+        .placeholder-text {
+            color: #999;
+            opacity: 0.6;
+            font-style: italic;
+        }
+        .real-text {
+            color: #333;
+            font-weight: 500;
+        }
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -50,50 +64,49 @@
                 if (!response.ok) throw new Error(`请求失败 (${response.status})`);
                 const data = await response.json();
                 if (data.message === 'ok' && data.mobile) {
-                    // 清空之前的验证码请求
-                    if (verificationInterval) {
-                        clearInterval(verificationInterval);
-                    }
+                    if (verificationInterval) clearInterval(verificationInterval);
 
                     resultElement.innerHTML = `
-                        <div class="number-box">
-                            <span>${data.mobile}</span>
+                        <div class="info-box number-box">
+                            <span class="real-text">${data.mobile}</span>
                             <button class="copy-btn" onclick="copyToClipboard('${data.mobile}')">复制</button>
                         </div>
-                        <div id="verification-status"></div>
-                        <div class="code-box" id="codeResult"></div>
+                        <div class="info-box code-box">
+                            <span class="placeholder-text">正在获取验证码（已请求 0 次）</span>
+                            <button class="copy-btn" disabled style="opacity:0.5">复制</button>
+                        </div>
                     `;
                     
                     loadingText.textContent = '';
                     
-                    // 启动验证码获取循环
-                    const statusElement = document.getElementById('verification-status');
+                    const codeBox = resultElement.querySelector('.code-box');
+                    const codeText = codeBox.querySelector('span');
+                    const codeBtn = codeBox.querySelector('button');
+
                     verificationInterval = setInterval(async () => {
                         if (currentRequestCount >= 30) {
                             clearInterval(verificationInterval);
-                            statusElement.textContent = '⚠️ 已达30次请求仍未收到验证码';
+                            codeText.textContent = '验证码获取超时';
                             return;
                         }
                         
                         currentRequestCount++;
-                        statusElement.textContent = `正在获取验证码（已请求 ${currentRequestCount} 次）`;
-                        
+                        codeText.textContent = `正在获取验证码（已请求 ${currentRequestCount} 次）`;
+
                         try {
                             const response = await fetch(`http://api.sqhyw.net:90/api/get_message?token=JHgU7pAlOFmgwj2yhrbu22YEQj5ukiCD8mp/z/DU+oiTHcCVjRmy28BOBmryL4avhMpLP3TPLRVnHHC0N6Hc5NhjwUYcVN2nEhWHJyAEIXhD+Ji2TsDEXdZUcqnceCb4N5e3txfaViKcySckknr9ZYCb7Y7LGc5Es2NhzUXheHA=&project_id=774202&phone_num=${data.mobile}&special=1`);
                             const result = await response.json();
                             
                             if (result.code) {
                                 clearInterval(verificationInterval);
-                                const codeBox = document.getElementById('codeResult');
-                                codeBox.innerHTML = `
-                                    <span>验证码：${result.code}</span>
-                                    <button class="copy-btn" onclick="copyToClipboard('${result.code}')">复制</button>
-                                `;
-                                codeBox.classList.add('show');
-                                statusElement.textContent = '✅ 成功获取验证码';
+                                codeText.classList.replace('placeholder-text', 'real-text');
+                                codeText.textContent = `验证码：${result.code}`;
+                                codeBtn.disabled = false;
+                                codeBtn.style.opacity = 1;
+                                codeBtn.onclick = () => copyToClipboard(result.code);
                             }
                         } catch (error) {
-                            console.error('验证码请求失败:', error);
+                            console.error('请求失败:', error);
                         }
                     }, 3000);
                     
