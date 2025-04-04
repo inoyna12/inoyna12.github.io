@@ -5,42 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>手机号获取工具</title>
     <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        button#getBtn {
+            display: block;
+            width: 200px;
+            margin: 2rem auto;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        button#getBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        button#getBtn:disabled {
+            background: linear-gradient(135deg, #cccccc, #b3b3b3);
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
         .info-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            background: #f8f9fa;
+            padding: 16px;
+            margin: 15px 0;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
+
         .number-box {
-            background: #e8f4ff;
+            background: linear-gradient(145deg, #e8f4ff, #d6e9ff);
+            border: 1px solid #b8d4ff;
         }
+
         .code-box {
-            background: #fff3e0;
+            background: linear-gradient(145deg, #fff3e0, #ffe8cc);
+            border: 1px solid #ffd8a4;
         }
-        .placeholder-text {
-            color: #999;
-            opacity: 0.6;
-            font-style: italic;
-        }
-        .real-text {
+
+        .info-text {
             color: #333;
+            font-size: 16px;
             font-weight: 500;
         }
+
+        .placeholder-text {
+            color: #999;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
         .copy-btn {
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-radius: 20px;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .copy-btn:hover:not(:disabled) {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .loading-text {
+            text-align: center;
+            color: #666;
+            margin: 1rem 0;
         }
     </style>
 </head>
 <body>
-    <button onclick="fetchData()">立即获取手机号</button>
+    <button id="getBtn" onclick="fetchData()">立即获取手机号</button>
     <div class="loading-text"></div>
     <div id="result"></div>
 
@@ -50,12 +110,12 @@
         let currentRequestCount = 0;
 
         function fetchData() {
-            const btn = document.querySelector('button');
+            const btn = document.getElementById('getBtn');
             const loadingText = document.querySelector('.loading-text');
             const resultElement = document.getElementById('result');
             
             btn.disabled = true;
-            loadingText.textContent = '正在获取号码...';
+            loadingText.textContent = '正在获取号码中...';
             resultElement.innerHTML = '';
             currentRequestCount = 0;
 
@@ -68,12 +128,12 @@
 
                     resultElement.innerHTML = `
                         <div class="info-box number-box">
-                            <span class="real-text">${data.mobile}</span>
+                            <span class="info-text">${data.mobile}</span>
                             <button class="copy-btn" onclick="copyToClipboard('${data.mobile}')">复制</button>
                         </div>
                         <div class="info-box code-box">
                             <span class="placeholder-text">正在获取验证码（已请求 0 次）</span>
-                            <button class="copy-btn" disabled style="opacity:0.5">复制</button>
+                            <button class="copy-btn" disabled>复制</button>
                         </div>
                     `;
                     
@@ -86,7 +146,8 @@
                     verificationInterval = setInterval(async () => {
                         if (currentRequestCount >= 30) {
                             clearInterval(verificationInterval);
-                            codeText.textContent = '验证码获取超时';
+                            codeText.textContent = '⚠️ 验证码获取超时';
+                            codeText.style.color = '#ff4444';
                             return;
                         }
                         
@@ -99,10 +160,9 @@
                             
                             if (result.code) {
                                 clearInterval(verificationInterval);
-                                codeText.classList.replace('placeholder-text', 'real-text');
-                                codeText.textContent = `验证码：${result.code}`;
+                                codeText.classList.replace('placeholder-text', 'info-text');
+                                codeText.textContent = result.code;
                                 codeBtn.disabled = false;
-                                codeBtn.style.opacity = 1;
                                 codeBtn.onclick = () => copyToClipboard(result.code);
                             }
                         } catch (error) {
@@ -125,7 +185,7 @@
 
         function copyToClipboard(content) {
             navigator.clipboard.writeText(content)
-                .then(() => alert('复制成功!'))
+                .then(() => alert('已成功复制到剪贴板！'))
                 .catch(err => console.error('复制失败:', err));
         }
     </script>
