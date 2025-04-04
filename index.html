@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>手机号获取工具</title>
     <style>
+        /* 修改部分开始 */
+        .number-box {
+            display: flex;
+            align-items: baseline; /* 改为基线对齐 */
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .copy-btn {
+            position: relative;
+            top: 2px; /* 微调按钮位置 */
+            padding: 7px 15px; /* 调整内边距 */
+            font-size: 14px;
+            background-color: #4CAF50;
+            border-radius: 20px;
+            transition: all 0.2s;
+            line-height: 1.2; /* 调整行高 */
+        }
+        /* 修改部分结束 */
+
         body {
             display: flex;
             flex-direction: column;
@@ -52,26 +72,6 @@
         #result.show {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        .number-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .copy-btn {
-            padding: 6px 15px;
-            font-size: 14px;
-            background-color: #4CAF50;
-            border-radius: 20px;
-            transition: all 0.2s;
-        }
-
-        .copy-btn:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
         }
 
         .loading-text {
