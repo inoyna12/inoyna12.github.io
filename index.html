@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>复刻页面</title>
-  <!-- 引入第三方库（如 Bootstrap） -->
+  <!-- 引入 Bootstrap CSS -->
   <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f0f2f5; }
+    .card { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    #actionBtn { width: 200px; }
+  </style>
 </head>
 <body>
   <!-- 导航栏 -->
@@ -19,15 +24,31 @@
     <div class="card">
       <div class="card-header">功能模块标题</div>
       <div class="card-body">
-        <!-- 内容：表单、表格、按钮等 -->
         <button id="actionBtn" class="btn btn-primary">点击交互</button>
         <div id="contentArea" class="mt-3"></div>
       </div>
     </div>
   </div>
 
-  <!-- 引入脚本 -->
+  <!-- 引入 jQuery 和自定义脚本 -->
   <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-  <script src="app.js"></script>
+  <script>
+    $(document).ready(function() {
+      // 解析 URL 参数
+      const urlParams = new URLSearchParams(window.location.search);
+      const kmValue = urlParams.get('km');
+      if (kmValue) {
+        $("#contentArea").append(`<p>参数 km: ${kmValue}</p>`);
+      }
+
+      // 模拟数据加载
+      $("#actionBtn").click(function() {
+        $("#contentArea").html("<p>正在加载数据...</p>");
+        setTimeout(() => {
+          $("#contentArea").html("<p>数据加载成功！</p>");
+        }, 1000);
+      });
+    });
+  </script>
 </body>
 </html>
