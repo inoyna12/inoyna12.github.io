@@ -3,98 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GET请求示例</title>
+    <title>手机号获取工具</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0 auto;
-            padding: 10px;
-            max-width: 100%;
-            min-height: 100vh;
-            box-sizing: border-box;
+        /* 新增样式 */
+        .number-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
         }
-        button {
-            width: 100%;
-            padding: 15px 25px;
-            font-size: 16px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            touch-action: manipulation;
-        }
-        button:active {
-            background-color: #1976D2;
-        }
-        #result {
-            margin-top: 15px;
-            padding: 12px;
+        .copy-btn {
+            width: auto;
+            padding: 8px 15px;
             font-size: 14px;
-            line-height: 1.5;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-x: auto;
+            background-color: #4CAF50;
         }
-        @media (min-width: 768px) {
-            body {
-                padding: 20px;
-                max-width: 800px;
-            }
-            button {
-                width: auto;
-                padding: 10px 20px;
-            }
-            #result {
-                font-size: 16px;
-            }
+        .copy-btn:hover {
+            background-color: #45a049;
+        }
+        /* 修改原样式 */
+        #result {
+            display: none; /* 默认隐藏 */
+            margin-top: 15px;
+            padding: 16px;
+            font-size: 18px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: white;
+        }
+        .loading-text {
+            opacity: 0.6;
+            text-align: center;
+            padding: 16px;
         }
     </style>
 </head>
 <body>
-    <button onclick="fetchData()">获取号码</button>
+    <button onclick="fetchData()">立即获取手机号</button>
+    <div class="loading-text"></div>
     <div id="result"></div>
 
     <script>
-        // 保持原有JavaScript代码不变
         const API_URL = 'http://api.sqhyw.net:90/api/get_mobile?token=JHgU7pAlOFmgwj2yhrbu22YEQj5ukiCD8mp/z/DU+oiTHcCVjRmy28BOBmryL4avhMpLP3TPLRVnHHC0N6Hc5NhjwUYcVN2nEhWHJyAEIXhD+Ji2TsDEXdZUcqnceCb4N5e3txfaViKcySckknr9ZYCb7Y7LGc5Es2NhzUXheHA=&project_id=774202&special=1';
 
         function fetchData() {
-            fetch(API_URL, {
-                method: 'GET'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+            const btn = document.querySelector('button');
+            const loadingText = document.querySelector('.loading-text');
+            const resultElement = document.getElementById('result');
+            
+            btn.classList.add('loading');
+            loadingText.textContent = '获取号码中···';
+            resultElement.style.display = 'none';
+
+            fetch(API_URL)
+            .then(async response => {
+                if (!response.ok) throw new Error(`请求失败 (${response.status})`);
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch {
+                    return text;
                 }
-                return response.text().then(text => {
-                    try {
-                        return JSON.parse(text);
-                    } catch {
-                        return text;
-                    }
-                });
             })
             .then(data => {
-                displayResult(data);
+                if (data.message === 'ok' && data.mobile) {
+                    resultElement.innerHTML = `
+                        <div class="number-box">
+                            <span>${data.mobile}</span>
+                            <button class="copy-btn" onclick="copyToClipboard('${data.mobile}')">复制号码</button>
+                        </div>
+                    `;
+                    resultElement.style.display = 'block';
+                    loadingText.textContent = '';
+                } else {
+                    throw new Error(data.message || '无效的响应数据');
+                }
             })
             .catch(error => {
-                console.error('请求失败:', error);
-                document.getElementById('result').textContent = `请求失败: ${error.message}`;
+                loadingText.textContent = `❌ 错误：${error.message}`;
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
             });
         }
 
-        function displayResult(data) {
-            const resultElement = document.getElementById('result');
-            if (typeof data === 'object') {
-                resultElement.textContent = JSON.stringify(data, null, 2);
-            } else {
-                resultElement.textContent = data;
-            }
+        function copyToClipboard(number) {
+            navigator.clipboard.writeText(number)
+                .then(() => alert('已复制到剪贴板'))
+                .catch(err => console.error('复制失败:', err));
         }
     </script>
 </body>
